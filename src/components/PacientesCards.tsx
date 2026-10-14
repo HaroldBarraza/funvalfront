@@ -1,12 +1,18 @@
-import { Mail, Phone, Stethoscope, Calendar } from "lucide-react";
-import type { Paciente } from "../types/paciente";
+import { Mail, Phone, Stethoscope, Calendar, Trash2 } from "lucide-react";
+import type { EstadoPaciente, Paciente } from "../types/paciente";
 import { BadgeEstado } from "./badgeEstado";
 
 interface PacienteCardProps {
   paciente: Paciente;
+  onCambiarEstado: (id: string, estado: EstadoPaciente) => void;
+  onEliminar: (id: string) => void;
 }
 
-export const PacientesCards = ({ paciente }: PacienteCardProps) => {
+export const PacientesCards = ({
+  paciente,
+  onCambiarEstado,
+  onEliminar,
+}: PacienteCardProps) => {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-blue-200 hover:shadow-md md:p-5">
       <div className="flex flex-col gap-3 md:hidden">
@@ -44,8 +50,9 @@ export const PacientesCards = ({ paciente }: PacienteCardProps) => {
         </div>
       </div>
 
+      {/*vista de computadora */}
       <div className="md:flex md:items-center md:gap-4">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-sm font-semibold text-blue-600">
+        <div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-sm font-semibold text-blue-600 md:flex">
           {paciente.nombre.charAt(0)}
           {paciente.apellido.charAt(0)}
         </div>
@@ -79,6 +86,29 @@ export const PacientesCards = ({ paciente }: PacienteCardProps) => {
         <div className="w-28 shrink-0 text-right">
           <BadgeEstado estado={paciente.estado} />
         </div>
+      </div>
+
+      <div className="mt-3 flex items-center gap-2 border-t border-slate-100 pt-3">
+        <select
+          value={paciente.estado}
+          onChange={(e) =>
+            onCambiarEstado(paciente.id, e.target.value as EstadoPaciente)
+          }
+          className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-700 focus:border-blue-400 focus:outline-none"
+        >
+          <option value="activo">Activo</option>
+          <option value="inactivo">Inactivo</option>
+          <option value="en_espera">En espera</option>
+        </select>
+
+        <button
+          type="button"
+          onClick={() => onEliminar(paciente.id)}
+          className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-100"
+        >
+          <Trash2 size={13} />
+          Eliminar
+        </button>
       </div>
     </div>
   );
