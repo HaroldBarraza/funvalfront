@@ -54,12 +54,15 @@ export const FormularioPaciente = ({ onAgregar }: FormularioPacienteProps) => {
     setError("");
   };
 
+  const inputClass =
+    "rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100";
+
   return (
     <form
       onSubmit={handleSubmit}
-      className="mb-5 rounded-xl border border-slate-700 bg-slate-800 p-4"
+      className="mb-5 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
     >
-      <h2 className="mb-3 text-sm font-semibold text-white">
+      <h2 className="mb-3 text-sm font-semibold text-slate-900">
         Agregar paciente
       </h2>
 
@@ -70,7 +73,7 @@ export const FormularioPaciente = ({ onAgregar }: FormularioPacienteProps) => {
           value={form.nombre}
           onChange={handleChange}
           placeholder="Nombre *"
-          className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-blue-400 focus:outline-none"
+          className={inputClass}
         />
         <input
           type="text"
@@ -78,7 +81,7 @@ export const FormularioPaciente = ({ onAgregar }: FormularioPacienteProps) => {
           value={form.apellido}
           onChange={handleChange}
           placeholder="Apellido"
-          className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-blue-400 focus:outline-none"
+          className={inputClass}
         />
         <input
           type="email"
@@ -86,13 +89,13 @@ export const FormularioPaciente = ({ onAgregar }: FormularioPacienteProps) => {
           value={form.email}
           onChange={handleChange}
           placeholder="Email *"
-          className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-blue-400 focus:outline-none"
+          className={inputClass}
         />
         <select
           name="estado"
           value={form.estado}
           onChange={handleChange}
-          className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-white focus:border-blue-400 focus:outline-none"
+          className={inputClass}
         >
           <option value="activo">Activo</option>
           <option value="inactivo">Inactivo</option>
@@ -101,12 +104,12 @@ export const FormularioPaciente = ({ onAgregar }: FormularioPacienteProps) => {
       </div>
 
       {error && (
-        <p className="mt-2 text-xs font-medium text-rose-400">{error}</p>
+        <p className="mt-2 text-xs font-medium text-rose-600">{error}</p>
       )}
 
       <button
         type="submit"
-        className="mt-3 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+        className="mt-3 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
       >
         Agregar
       </button>

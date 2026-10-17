@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Mail, Phone, Stethoscope, Calendar, Trash2 } from "lucide-react";
 import type { EstadoPaciente, Paciente } from "../types/paciente";
 import { BadgeEstado } from "./badgeEstado";
@@ -23,7 +24,7 @@ export const PacientesCards = ({
               {paciente.apellido.charAt(0)}
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-slate-800">
+              <p className="truncate text-sm font-semibold text-slate-900">
                 {paciente.nombre} {paciente.apellido}
               </p>
               <p className="truncate text-xs text-slate-500">
@@ -50,7 +51,6 @@ export const PacientesCards = ({
         </div>
       </div>
 
-      {/*vista de computadora */}
       <div className="md:flex md:items-center md:gap-4">
         <div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-sm font-semibold text-blue-600 md:flex">
           {paciente.nombre.charAt(0)}
@@ -58,7 +58,7 @@ export const PacientesCards = ({
         </div>
 
         <div className="w-48 shrink-0">
-          <p className="text-sm font-semibold text-slate-800">
+          <p className="text-sm font-semibold text-slate-900">
             {paciente.nombre} {paciente.apellido}
           </p>
           <p className="flex items-center gap-1.5 text-xs text-slate-500">
@@ -94,7 +94,7 @@ export const PacientesCards = ({
           onChange={(e) =>
             onCambiarEstado(paciente.id, e.target.value as EstadoPaciente)
           }
-          className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-700 focus:border-blue-400 focus:outline-none"
+          className="rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-700 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
         >
           <option value="activo">Activo</option>
           <option value="inactivo">Inactivo</option>
@@ -104,11 +104,18 @@ export const PacientesCards = ({
         <button
           type="button"
           onClick={() => onEliminar(paciente.id)}
-          className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-100"
+          className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs font-medium text-rose-600 transition hover:bg-rose-100"
         >
           <Trash2 size={13} />
           Eliminar
         </button>
+
+        <Link
+          to={`/pacientes/${paciente.id}`}
+          className="ml-auto inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-xs font-medium text-blue-600 transition hover:bg-blue-100"
+        >
+          Ver detalle →
+        </Link>
       </div>
     </div>
   );
