@@ -1,14 +1,75 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Mail, Phone, Stethoscope, Calendar, ArrowLeft } from "lucide-react";
-import { BadgeEstado } from "../components/badgeEstado"; 
-import { Pacientesdata } from "../data/pacientes";
+import { BadgeEstado } from "../components/badgeEstado";
+import { api } from "../libs/axios";
 import { Paginanoencontrada } from "./Pagenoencontrado";
+import type { Paciente } from "../types/paciente";
+
+interface PacienteAPI {
+  id_paciente: number;
+  name_paciente: string;
+  appaterno_paciente: string;
+  apmaterno_paciente: string;
+  telefono: string;
+  email: string;
+  fecha_nacimiento: string;
+  genero: string;
+  fecha_registro: string;
+}
+
+const mapearPaciente = (p: PacienteAPI): Paciente => ({
+  id: String(p.id_paciente),
+  nombre: p.name_paciente,
+  apellido: `${p.appaterno_paciente} ${p.apmaterno_paciente}`.trim(),
+  email: p.email,
+  telefono: p.telefono,
+  especialidadAsignada: "Sin asignar",
+  ultimaCita: "—",
+  estado: "activo",
+});
 
 export const DetallePaciente = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const paciente = Pacientesdata.find((p) => p.id === id);
+  const [paciente, setPaciente] = useState<Paciente | null>(null);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    api
+      .get("/pacientes")
+      .then((res) => {
+        const lista: Paciente[] = res.data.datos.map(mapearPaciente);
+        const encontrado = lista.find((p) => p.id === id) ?? null;
+        setPaciente(encontrado);
+      })
+      .catch(() => setError(true))
+      .finally(() => setCargando(false));
+  }, [id]);
+
+  if (cargando) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <p className="text-sm text-slate-500">Cargando...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3">
+        <p className="text-sm text-slate-500">No se pudo cargar el paciente.</p>
+        <button
+          onClick={() => navigate(-1)}
+          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
+        >
+          Volver
+        </button>
+      </div>
+    );
+  }
 
   if (!paciente) {
     return <Paginanoencontrada />;

@@ -1,4 +1,4 @@
-import type { Paciente } from "../types/paciente";
+/* import type { Paciente } from "../types/paciente";
 
 export const Pacientesdata: Paciente[] = [
   {
@@ -52,3 +52,4 @@ export const Pacientesdata: Paciente[] = [
     estado: "en_espera",
   },
 ];
+ */

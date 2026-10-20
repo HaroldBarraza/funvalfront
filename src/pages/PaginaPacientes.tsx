@@ -1,17 +1,65 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Users } from "lucide-react";
 import type { EstadoPaciente, Paciente } from "../types/paciente";
 import { SearchBar } from "../components/serarchbar";
 import { PacientesCards } from "../components/PacientesCards";
 import { FormularioPaciente } from "../components/formularioPaciente";
-import { Pacientesdata } from "../data/pacientes";
+import { api } from "../libs/axios";
 
 type EstadoFiltro = EstadoPaciente | "Todos";
 
+interface PacienteAPI {
+  id_paciente: number;
+  name_paciente: string;
+  appaterno_paciente: string;
+  apmaterno_paciente: string;
+  telefono: string;
+  email: string;
+  fecha_nacimiento: string;
+  genero: string;
+  fecha_registro: string;
+}
+
+
+const mapearPaciente = (p: PacienteAPI): Paciente => ({
+  id: String(p.id_paciente),
+  nombre: p.name_paciente,
+  apellido: `${p.appaterno_paciente} ${p.apmaterno_paciente}`.trim(),
+  email: p.email,
+  telefono: p.telefono,
+  especialidadAsignada: "Sin asignar",
+  ultimaCita: "—",
+  estado: "activo",
+});
+
 export default function PaginaPacientes() {
-  const [pacientes, setPacientes] = useState<Paciente[]>(Pacientesdata);
+  const [pacientes, setPacientes] = useState<Paciente[]>([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(false);
+
   const [busqueda, setBusqueda] = useState("");
   const [estadoFiltro, setEstadoFiltro] = useState<EstadoFiltro>("Todos");
+
+  const cargarPacientes = () => {
+    api
+      .get("/pacientes")
+      .then((res) => {
+        const mapeados: Paciente[] = res.data.datos.map(mapearPaciente);
+        setPacientes(mapeados);
+      })
+      .catch(() => setError(true))
+      .finally(() => setCargando(false));
+  };
+
+  useEffect(() => {
+    cargarPacientes();
+  }, []);
+
+  const reintentar = () => {
+    setCargando(true);
+    setError(false);
+    cargarPacientes();
+  };
 
   const termino = busqueda.trim().toLowerCase();
   const pacientesFiltrados = pacientes.filter((p) => {
@@ -56,6 +104,36 @@ export default function PaginaPacientes() {
 
   const hayFiltrosActivos = busqueda.trim() !== "" || estadoFiltro !== "Todos";
 
+  if (cargando) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600" />
+        <p className="text-sm text-slate-500">Cargando pacientes...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 px-6 text-center">
+        <p className="text-4xl">⚠️</p>
+        <h1 className="text-lg font-semibold text-slate-900">
+          No se pudieron cargar los pacientes
+        </h1>
+        <p className="max-w-md text-sm text-slate-500">
+          Verifica que el servidor esté corriendo y que tu sesión siga activa.
+        </p>
+        <button
+          type="button"
+          onClick={reintentar}
+          className="mt-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       <header className="mb-6 flex items-center gap-3">
@@ -99,9 +177,15 @@ export default function PaginaPacientes() {
       </div>
 
       <p className="mb-3 text-xs font-medium text-slate-500">
-        {pacientesFiltrados.length} paciente
-        {pacientesFiltrados.length !== 1 ? "s" : ""} encontrado
-        {pacientesFiltrados.length !== 1 ? "s" : ""}
+        {pacientes.length} paciente{pacientes.length !== 1 ? "s" : ""}{" "}
+        registrado{pacientes.length !== 1 ? "s" : ""}
+        {hayFiltrosActivos && (
+          <>
+            {" · "}
+            {pacientesFiltrados.length} mostrado
+            {pacientesFiltrados.length !== 1 ? "s" : ""}
+          </>
+        )}
       </p>
 
       {pacientesFiltrados.length > 0 ? (

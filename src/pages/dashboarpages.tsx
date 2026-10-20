@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Users, CalendarDays, Activity, Clock } from "lucide-react";
+import { Users, CalendarDays, Activity, Stethoscope } from "lucide-react";
+
+import { api } from "../libs/axios";
 import { StatusBadge } from "../components/serarchbar";
 
 interface StatCardProps {
@@ -18,7 +20,9 @@ const StatCard = ({ label, value, icon: Icon, color }: StatCardProps) => {
           <p className="text-sm font-medium text-slate-500">{label}</p>
           <p className="mt-1 text-2xl font-bold text-slate-900">{value}</p>
         </div>
-        <div className={`flex h-11 w-11 items-center justify-center rounded-lg ${color}`}>
+        <div
+          className={`flex h-11 w-11 items-center justify-center rounded-lg ${color}`}
+        >
           <Icon className="h-5 w-5" />
         </div>
       </div>
@@ -27,8 +31,27 @@ const StatCard = ({ label, value, icon: Icon, color }: StatCardProps) => {
 };
 
 export default function PaginaDashboard() {
-  const [pacientes, setPacientes] = useState(128);
   const [mantenimiento, setMantenimiento] = useState(false);
+
+  const [pacientes, setPacientes] = useState<number | null>(null);
+  const [medicos, setMedicos] = useState<number | null>(null);
+  const [citasprogramada, setCitasProgrmadas] = useState<number | null>(null);
+  const [citasCompletadas, setCitasCompletadas] = useState<number | null>(null);
+
+  useEffect(() => {
+    api.get("/pacientes").then((res) => {
+      console.log("pacientes:", res.data);
+      setPacientes(res.data.datos.length)
+    });
+    
+    api.get("/users/medicos").then((res) => setMedicos(res.data.datos.length));
+    api
+      .get("/citas", { params: { estado: "Programada" } })
+      .then((res) => setCitasProgrmadas(res.data.datos.length));
+    api
+      .get("/citas", { params: { estado: "Completado" } })
+      .then((res) => setCitasCompletadas(res.data.datos.length));
+  }, []);
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-10">
@@ -54,60 +77,36 @@ export default function PaginaDashboard() {
 
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          label="Total pacientes"
+          label="Pacientes"
           value={pacientes}
           icon={Users}
           color="bg-blue-50 text-blue-600"
         />
         <StatCard
-          label="Pacientes activos"
-          value={Math.round(pacientes * 0.75)}
-          icon={Activity}
-          color="bg-emerald-50 text-emerald-600"
-        />
-        <StatCard
-          label="En espera"
-          value={15}
-          icon={Clock}
-          color="bg-amber-50 text-amber-600"
+          label="Médicos"
+          value={medicos}
+          icon={Stethoscope}
+          color="bg-violet-50 text-violet-600"
         />
         <StatCard
           label="Citas programadas"
-          value={5}
+          value={citasprogramada}
           icon={CalendarDays}
           color="bg-sky-50 text-sky-600"
         />
+        <StatCard
+          label="Completadas hoy"
+          value={citasCompletadas}
+          icon={Activity}
+          color="bg-emerald-50 text-emerald-600"
+        />
       </div>
-
-      <section className="mb-8 flex flex-wrap gap-3">
-        <button
-          type="button"
-          onClick={() => setPacientes((prev) => prev + 1)}
-          className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
-        >
-          <span className="text-base">+</span>
-          Paciente
-        </button>
-        <button
-          type="button"
-          onClick={() => setPacientes((prev) => Math.max(0, prev - 1))}
-          className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700"
-        >
-          <span className="text-base">−</span>
-          Paciente
-        </button>
-        <button
-          type="button"
-          onClick={() => setMantenimiento((prev) => !prev)}
-          className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-        >
-          {mantenimiento ? "Desactivar mantenimiento" : "Activar mantenimiento"}
-        </button>
-      </section>
 
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="mb-4 font-semibold text-slate-900">Acciones rápidas</h2>
+          <h2 className="mb-4 font-semibold text-slate-900">
+            Acciones rápidas
+          </h2>
           <div className="space-y-3">
             <Link
               to="/pacientes"
@@ -115,7 +114,9 @@ export default function PaginaDashboard() {
             >
               <Users className="h-5 w-5 text-blue-600" />
               <div>
-                <p className="text-sm font-medium text-slate-900">Ver pacientes</p>
+                <p className="text-sm font-medium text-slate-900">
+                  Ver pacientes
+                </p>
                 <p className="text-xs text-slate-500">
                   Gestionar lista de pacientes
                 </p>
@@ -139,17 +140,11 @@ export default function PaginaDashboard() {
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="mb-4 font-semibold text-slate-900">Estado del sistema</h2>
+          <h2 className="mb-4 font-semibold text-slate-900">
+            Estado del sistema
+          </h2>
           <div className="space-y-4 text-sm">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <span className="text-slate-500">Servidor</span>
-              <span className="font-medium text-emerald-600">Operativo</span>
-            </div>
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <span className="text-slate-500">Base de datos</span>
-              <span className="font-medium text-emerald-600">Operativa</span>
-            </div>
-            <div className="flex items-center justify-between">
               <span className="text-slate-500">Modo mantenimiento</span>
               <span
                 className={`font-medium ${
@@ -159,6 +154,15 @@ export default function PaginaDashboard() {
                 {mantenimiento ? "Activo" : "Inactivo"}
               </span>
             </div>
+            <button
+              type="button"
+              onClick={() => setMantenimiento((prev) => !prev)}
+              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              {mantenimiento
+                ? "Desactivar mantenimiento"
+                : "Activar mantenimiento"}
+            </button>
           </div>
         </div>
       </section>
