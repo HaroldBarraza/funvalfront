@@ -1,25 +1,14 @@
 import { useEffect, useState } from "react";
 import { Users } from "lucide-react";
-import type { EstadoPaciente, Paciente } from "../types/paciente";
+import toast from "react-hot-toast";
 import { SearchBar } from "../components/serarchbar";
 import { PacientesCards } from "../components/PacientesCards";
 import { FormularioPaciente } from "../components/formularioPaciente";
-import { api } from "../libs/axios";
-
-type EstadoFiltro = EstadoPaciente | "Todos";
-
-interface PacienteAPI {
-  id_paciente: number;
-  name_paciente: string;
-  appaterno_paciente: string;
-  apmaterno_paciente: string;
-  telefono: string;
-  email: string;
-  fecha_nacimiento: string;
-  genero: string;
-  fecha_registro: string;
-}
-
+import { ModalConfirmacion } from "../components/ModalConfirmacion";
+import { getAll, remove } from "../service/pacientes";
+import type { PacienteAPI } from "../service/pacientes";
+import { extraerMensajeError } from "../service/errorHandler";
+import type { Paciente } from "../types/paciente";
 
 const mapearPaciente = (p: PacienteAPI): Paciente => ({
   id: String(p.id_paciente),
@@ -38,15 +27,15 @@ export default function PaginaPacientes() {
   const [error, setError] = useState(false);
 
   const [busqueda, setBusqueda] = useState("");
-  const [estadoFiltro, setEstadoFiltro] = useState<EstadoFiltro>("Todos");
+
+  const [pacienteAEliminar, setPacienteAEliminar] = useState<Paciente | null>(
+    null,
+  );
+  const [eliminando, setEliminando] = useState(false);
 
   const cargarPacientes = () => {
-    api
-      .get("/pacientes")
-      .then((res) => {
-        const mapeados: Paciente[] = res.data.datos.map(mapearPaciente);
-        setPacientes(mapeados);
-      })
+    getAll()
+      .then((res) => setPacientes(res.data.datos.map(mapearPaciente)))
       .catch(() => setError(true))
       .finally(() => setCargando(false));
   };
@@ -63,46 +52,38 @@ export default function PaginaPacientes() {
 
   const termino = busqueda.trim().toLowerCase();
   const pacientesFiltrados = pacientes.filter((p) => {
-    const coincideBusqueda =
-      !termino ||
+    if (!termino) return true;
+    return (
       `${p.nombre} ${p.apellido}`.toLowerCase().includes(termino) ||
-      p.email.toLowerCase().includes(termino);
-
-    const coincideEstado =
-      estadoFiltro === "Todos" || p.estado === estadoFiltro;
-
-    return coincideBusqueda && coincideEstado;
+      p.email.toLowerCase().includes(termino)
+    );
   });
 
-  const handleAgregar = (nuevo: Omit<Paciente, "id">) => {
-    const paciente: Paciente = { ...nuevo, id: crypto.randomUUID() };
-    setPacientes((prev) => [...prev, paciente]);
+  const handleCreado = (p: PacienteAPI) => {
+    setPacientes((prev) => [...prev, mapearPaciente(p)]);
   };
 
-  const handleCambiarEstado = (id: string, estado: EstadoPaciente) => {
-    setPacientes((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, estado } : p)),
-    );
-  };
-
-  const handleEliminar = (id: string) => {
+  const abrirModalEliminar = (id: string) => {
     const paciente = pacientes.find((p) => p.id === id);
-    if (!paciente) return;
-
-    const ok = window.confirm(
-      `¿Eliminar a ${paciente.nombre} ${paciente.apellido}?`,
-    );
-    if (!ok) return;
-
-    setPacientes((prev) => prev.filter((p) => p.id !== id));
+    if (paciente) setPacienteAEliminar(paciente);
   };
 
-  const limpiarFiltros = () => {
-    setBusqueda("");
-    setEstadoFiltro("Todos");
+  const confirmarEliminar = async () => {
+    if (!pacienteAEliminar) return;
+    setEliminando(true);
+    try {
+      await remove(Number(pacienteAEliminar.id));
+      setPacientes((prev) =>
+        prev.filter((p) => p.id !== pacienteAEliminar.id),
+      );
+      toast.success("Paciente eliminado");
+      setPacienteAEliminar(null);
+    } catch (err) {
+      toast.error(extraerMensajeError(err));
+    } finally {
+      setEliminando(false);
+    }
   };
-
-  const hayFiltrosActivos = busqueda.trim() !== "" || estadoFiltro !== "Todos";
 
   if (cargando) {
     return (
@@ -148,38 +129,16 @@ export default function PaginaPacientes() {
         </div>
       </header>
 
-      <FormularioPaciente onAgregar={handleAgregar} />
+      <FormularioPaciente onCreado={handleCreado} />
 
-      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="flex-1">
-          <SearchBar value={busqueda} onchange={setBusqueda} />
-        </div>
-
-        <select
-          value={estadoFiltro}
-          onChange={(e) => setEstadoFiltro(e.target.value as EstadoFiltro)}
-          className="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-        >
-          <option value="Todos">Todos</option>
-          <option value="activo">Activo</option>
-          <option value="inactivo">Inactivo</option>
-          <option value="en_espera">En espera</option>
-        </select>
-
-        <button
-          type="button"
-          onClick={limpiarFiltros}
-          disabled={!hayFiltrosActivos}
-          className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          Limpiar filtros
-        </button>
+      <div className="mb-5">
+        <SearchBar value={busqueda} onchange={setBusqueda} />
       </div>
 
       <p className="mb-3 text-xs font-medium text-slate-500">
         {pacientes.length} paciente{pacientes.length !== 1 ? "s" : ""}{" "}
         registrado{pacientes.length !== 1 ? "s" : ""}
-        {hayFiltrosActivos && (
+        {termino && (
           <>
             {" · "}
             {pacientesFiltrados.length} mostrado
@@ -194,8 +153,7 @@ export default function PaginaPacientes() {
             <PacientesCards
               key={paciente.id}
               paciente={paciente}
-              onCambiarEstado={handleCambiarEstado}
-              onEliminar={handleEliminar}
+              onEliminar={abrirModalEliminar}
             />
           ))}
         </div>
@@ -206,6 +164,20 @@ export default function PaginaPacientes() {
           </p>
         </div>
       )}
+
+      <ModalConfirmacion
+        abierto={pacienteAEliminar !== null}
+        titulo="Eliminar paciente"
+        mensaje={
+          pacienteAEliminar
+            ? `¿Estás seguro de eliminar a ${pacienteAEliminar.nombre} ${pacienteAEliminar.apellido}? Esta acción no se puede deshacer.`
+            : ""
+        }
+        textoConfirmar="Eliminar"
+        cargando={eliminando}
+        onConfirmar={confirmarEliminar}
+        onCancelar={() => setPacienteAEliminar(null)}
+      />
     </div>
   );
 }

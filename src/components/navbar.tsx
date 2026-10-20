@@ -26,6 +26,9 @@ export const Nav = () => {
         <NavLink to="/pacientes" className={linkClass}>
           Pacientes
         </NavLink>
+        <NavLink to="/citas" className={linkClass}>
+        Citas
+        </NavLink>
         <NavLink to="/citas/nueva" className={linkClass}>
           Nueva cita
         </NavLink>

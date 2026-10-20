@@ -7,7 +7,7 @@ import { StatusBadge } from "../components/serarchbar";
 
 interface StatCardProps {
   label: string;
-  value: number | string;
+  value: number | null;
   icon: typeof Users;
   color: string;
 }
@@ -18,7 +18,9 @@ const StatCard = ({ label, value, icon: Icon, color }: StatCardProps) => {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-slate-500">{label}</p>
-          <p className="mt-1 text-2xl font-bold text-slate-900">{value}</p>
+          <p className="mt-1 text-2xl font-bold text-slate-900">
+            {value ?? "..."}
+          </p>
         </div>
         <div
           className={`flex h-11 w-11 items-center justify-center rounded-lg ${color}`}
@@ -35,22 +37,27 @@ export default function PaginaDashboard() {
 
   const [pacientes, setPacientes] = useState<number | null>(null);
   const [medicos, setMedicos] = useState<number | null>(null);
-  const [citasprogramada, setCitasProgrmadas] = useState<number | null>(null);
+  const [citasProgramadas, setCitasProgramadas] = useState<number | null>(null);
   const [citasCompletadas, setCitasCompletadas] = useState<number | null>(null);
 
   useEffect(() => {
     api.get("/pacientes").then((res) => {
-      console.log("pacientes:", res.data);
-      setPacientes(res.data.datos.length)
+      setPacientes(res.data.datos.length);
     });
-    
-    api.get("/users/medicos").then((res) => setMedicos(res.data.datos.length));
-    api
-      .get("/citas", { params: { estado: "Programada" } })
-      .then((res) => setCitasProgrmadas(res.data.datos.length));
-    api
-      .get("/citas", { params: { estado: "Completado" } })
-      .then((res) => setCitasCompletadas(res.data.datos.length));
+
+    api.get("/users/medicos").then((res) => {
+      setMedicos(res.data.datos.length);
+    });
+
+    api.get("/citas").then((res) => {
+      const citas = res.data.datos;
+      setCitasProgramadas(
+        citas.filter((c: { id_estado: number }) => c.id_estado === 1).length,
+      );
+      setCitasCompletadas(
+        citas.filter((c: { id_estado: number }) => c.id_estado === 2).length,
+      );
+    });
   }, []);
 
   return (
@@ -90,7 +97,7 @@ export default function PaginaDashboard() {
         />
         <StatCard
           label="Citas programadas"
-          value={citasprogramada}
+          value={citasProgramadas}
           icon={CalendarDays}
           color="bg-sky-50 text-sky-600"
         />

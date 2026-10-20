@@ -1,21 +1,17 @@
 import { Link } from "react-router-dom";
 import { Mail, Phone, Stethoscope, Calendar, Trash2 } from "lucide-react";
-import type { EstadoPaciente, Paciente } from "../types/paciente";
+import type { Paciente } from "../types/paciente";
 import { BadgeEstado } from "./badgeEstado";
 
 interface PacienteCardProps {
   paciente: Paciente;
-  onCambiarEstado: (id: string, estado: EstadoPaciente) => void;
   onEliminar: (id: string) => void;
 }
 
-export const PacientesCards = ({
-  paciente,
-  onCambiarEstado,
-  onEliminar,
-}: PacienteCardProps) => {
+export const PacientesCards = ({ paciente, onEliminar }: PacienteCardProps) => {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-blue-200 hover:shadow-md md:p-5">
+      {/* ---------- Vista mobile ---------- */}
       <div className="flex flex-col gap-3 md:hidden">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -51,6 +47,7 @@ export const PacientesCards = ({
         </div>
       </div>
 
+      {/* ---------- Vista desktop ---------- */}
       <div className="md:flex md:items-center md:gap-4">
         <div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-sm font-semibold text-blue-600 md:flex">
           {paciente.nombre.charAt(0)}
@@ -88,19 +85,8 @@ export const PacientesCards = ({
         </div>
       </div>
 
+      {/* ---------- Acciones ---------- */}
       <div className="mt-3 flex items-center gap-2 border-t border-slate-100 pt-3">
-        <select
-          value={paciente.estado}
-          onChange={(e) =>
-            onCambiarEstado(paciente.id, e.target.value as EstadoPaciente)
-          }
-          className="rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-700 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-        >
-          <option value="activo">Activo</option>
-          <option value="inactivo">Inactivo</option>
-          <option value="en_espera">En espera</option>
-        </select>
-
         <button
           type="button"
           onClick={() => onEliminar(paciente.id)}
