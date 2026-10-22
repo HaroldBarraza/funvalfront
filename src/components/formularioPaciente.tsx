@@ -3,15 +3,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { pacienteSchema } from "../schemas/pacientesschema";
 import type { PacienteFormData } from "../schemas/pacientesschema";
-import { create } from "../service/pacientes";
-import type { PacienteAPI } from "../service/pacientes";
+import { usePacienteStore } from "../stores/pacientesstore";
 import { extraerMensajeError } from "../service/errorHandler";
 
-interface FormularioPacienteProps {
-  onCreado: (paciente: PacienteAPI) => void;
-}
+export const FormularioPaciente = () => {
+  const crear = usePacienteStore((s) => s.crear);
 
-export const FormularioPaciente = ({ onCreado }: FormularioPacienteProps) => {
   const {
     register,
     handleSubmit,
@@ -32,9 +29,8 @@ export const FormularioPaciente = ({ onCreado }: FormularioPacienteProps) => {
 
   const onSubmit = async (data: PacienteFormData) => {
     try {
-      const res = await create(data);
+      await crear(data);
       toast.success("Paciente registrado");
-      onCreado(res.data.data);
       reset();
     } catch (err) {
       toast.error(extraerMensajeError(err));

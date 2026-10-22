@@ -55,7 +55,7 @@ export type CrearCitasDto = {
 export const getAll = () =>
   api.get<{ datos: CitasApi[] }>("/citas");
 
-export const create = (data: CrearCitasDto) =>
+export const createCitas = (data: CrearCitasDto) =>
   api.post<{ data: CitasApi }>("/citas", data);
 
 export const updateEstado = (id: number, estado: number) =>

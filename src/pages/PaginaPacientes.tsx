@@ -5,63 +5,41 @@ import { SearchBar } from "../components/serarchbar";
 import { PacientesCards } from "../components/PacientesCards";
 import { FormularioPaciente } from "../components/formularioPaciente";
 import { ModalConfirmacion } from "../components/ModalConfirmacion";
-import { getAll, remove } from "../service/pacientes";
-import type { PacienteAPI } from "../service/pacientes";
+import { usePacienteStore } from "../stores/pacientesstore";
+import { useFiltrosStore } from "../stores/filtrostore";
 import { extraerMensajeError } from "../service/errorHandler";
 import type { Paciente } from "../types/paciente";
 
-const mapearPaciente = (p: PacienteAPI): Paciente => ({
-  id: String(p.id_paciente),
-  nombre: p.name_paciente,
-  apellido: `${p.appaterno_paciente} ${p.apmaterno_paciente}`.trim(),
-  email: p.email,
-  telefono: p.telefono,
-  especialidadAsignada: "Sin asignar",
-  ultimaCita: "—",
-  estado: "activo",
-});
-
 export default function PaginaPacientes() {
-  const [pacientes, setPacientes] = useState<Paciente[]>([]);
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState(false);
+  // Store de pacientes
+  const pacientes = usePacienteStore((s) => s.paciente);
+  const cargando = usePacienteStore((s) => s.cargando);
+  const error = usePacienteStore((s) => s.error);
+  const cargar = usePacienteStore((s) => s.cargar);
+  const eliminar = usePacienteStore((s) => s.eliminar);
 
-  const [busqueda, setBusqueda] = useState("");
+  // Store de filtros
+  const queryPacientes = useFiltrosStore((s) => s.queryPacientes);
+  const setQueryPacientes = useFiltrosStore((s) => s.setQueryPacientes);
 
+  // UI local (modal)
   const [pacienteAEliminar, setPacienteAEliminar] = useState<Paciente | null>(
     null,
   );
   const [eliminando, setEliminando] = useState(false);
 
-  const cargarPacientes = () => {
-    getAll()
-      .then((res) => setPacientes(res.data.datos.map(mapearPaciente)))
-      .catch(() => setError(true))
-      .finally(() => setCargando(false));
-  };
-
   useEffect(() => {
-    cargarPacientes();
+    cargar();
   }, []);
 
-  const reintentar = () => {
-    setCargando(true);
-    setError(false);
-    cargarPacientes();
-  };
-
-  const termino = busqueda.trim().toLowerCase();
-  const pacientesFiltrados = pacientes.filter((p) => {
-    if (!termino) return true;
-    return (
-      `${p.nombre} ${p.apellido}`.toLowerCase().includes(termino) ||
-      p.email.toLowerCase().includes(termino)
-    );
-  });
-
-  const handleCreado = (p: PacienteAPI) => {
-    setPacientes((prev) => [...prev, mapearPaciente(p)]);
-  };
+  const termino = queryPacientes.trim().toLowerCase();
+  const pacientesFiltrados = termino
+    ? pacientes.filter(
+        (p) =>
+          `${p.nombre} ${p.apellido}`.toLowerCase().includes(termino) ||
+          p.email.toLowerCase().includes(termino),
+      )
+    : pacientes;
 
   const abrirModalEliminar = (id: string) => {
     const paciente = pacientes.find((p) => p.id === id);
@@ -72,10 +50,7 @@ export default function PaginaPacientes() {
     if (!pacienteAEliminar) return;
     setEliminando(true);
     try {
-      await remove(Number(pacienteAEliminar.id));
-      setPacientes((prev) =>
-        prev.filter((p) => p.id !== pacienteAEliminar.id),
-      );
+      await eliminar(Number(pacienteAEliminar.id));
       toast.success("Paciente eliminado");
       setPacienteAEliminar(null);
     } catch (err) {
@@ -101,12 +76,10 @@ export default function PaginaPacientes() {
         <h1 className="text-lg font-semibold text-slate-900">
           No se pudieron cargar los pacientes
         </h1>
-        <p className="max-w-md text-sm text-slate-500">
-          Verifica que el servidor esté corriendo y que tu sesión siga activa.
-        </p>
+        <p className="max-w-md text-sm text-slate-500">{error}</p>
         <button
           type="button"
-          onClick={reintentar}
+          onClick={() => cargar()}
           className="mt-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
         >
           Reintentar
@@ -129,10 +102,10 @@ export default function PaginaPacientes() {
         </div>
       </header>
 
-      <FormularioPaciente onCreado={handleCreado} />
+      <FormularioPaciente />
 
       <div className="mb-5">
-        <SearchBar value={busqueda} onchange={setBusqueda} />
+        <SearchBar value={queryPacientes} onchange={setQueryPacientes} />
       </div>
 
       <p className="mb-3 text-xs font-medium text-slate-500">
