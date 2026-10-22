@@ -24,7 +24,7 @@ export type ActualizarPacienteDTO = Partial<CrearPacienteDTO>;
 export const getAll = () =>
   api.get<{ datos: PacienteAPI[] }>("/pacientes");
 
-export const create = (data: CrearPacienteDTO) =>
+export const creatpaciente = (data: CrearPacienteDTO) =>
   api.post<{ data: PacienteAPI }>("/pacientes", data);
 
 export const update = (id: number, data: ActualizarPacienteDTO) =>

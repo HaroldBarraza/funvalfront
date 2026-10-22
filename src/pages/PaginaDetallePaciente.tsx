@@ -1,55 +1,27 @@
-import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Mail, Phone, Stethoscope, Calendar, ArrowLeft } from "lucide-react";
 import { BadgeEstado } from "../components/badgeEstado";
-import { api } from "../libs/axios";
 import { Paginanoencontrada } from "./Pagenoencontrado";
-import type { Paciente } from "../types/paciente";
-
-interface PacienteAPI {
-  id_paciente: number;
-  name_paciente: string;
-  appaterno_paciente: string;
-  apmaterno_paciente: string;
-  telefono: string;
-  email: string;
-  fecha_nacimiento: string;
-  genero: string;
-  fecha_registro: string;
-}
-
-const mapearPaciente = (p: PacienteAPI): Paciente => ({
-  id: String(p.id_paciente),
-  nombre: p.name_paciente,
-  apellido: `${p.appaterno_paciente} ${p.apmaterno_paciente}`.trim(),
-  email: p.email,
-  telefono: p.telefono,
-  especialidadAsignada: "Sin asignar",
-  ultimaCita: "—",
-  estado: "activo",
-});
+import { usePacienteStore } from "../stores/pacientesstore";
 
 export const DetallePaciente = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const [paciente, setPaciente] = useState<Paciente | null>(null);
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState(false);
+  const pacientes = usePacienteStore((s) => s.paciente);
+  const cargando = usePacienteStore((s) => s.cargando);
+  const cargar = usePacienteStore((s) => s.cargar);
+
+  const [inicializando, setInicializando] = useState(pacientes.length === 0);
 
   useEffect(() => {
-    api
-      .get("/pacientes")
-      .then((res) => {
-        const lista: Paciente[] = res.data.datos.map(mapearPaciente);
-        const encontrado = lista.find((p) => p.id === id) ?? null;
-        setPaciente(encontrado);
-      })
-      .catch(() => setError(true))
-      .finally(() => setCargando(false));
-  }, [id]);
+    if (pacientes.length === 0) {
+      cargar().finally(() => setInicializando(false));
+    }
+  }, []);
 
-  if (cargando) {
+  if (inicializando || (cargando && pacientes.length === 0)) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <p className="text-sm text-slate-500">Cargando...</p>
@@ -57,29 +29,18 @@ export const DetallePaciente = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3">
-        <p className="text-sm text-slate-500">No se pudo cargar el paciente.</p>
-        <button
-          onClick={() => navigate(-1)}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
-        >
-          Volver
-        </button>
-      </div>
-    );
-  }
+  const paciente = pacientes.find((p) => p.id === id);
 
   if (!paciente) {
     return <Paginanoencontrada />;
   }
+
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
       <button
         type="button"
         onClick={() => navigate(-1)}
-        className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-[#3b82f6]"
+        className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-blue-600"
       >
         <ArrowLeft size={16} />
         Volver
@@ -94,7 +55,7 @@ export const DetallePaciente = () => {
             </div>
 
             <div>
-              <h1 className="text-xl font-bold text-[#101828]">
+              <h1 className="text-xl font-bold text-slate-900">
                 {paciente.nombre} {paciente.apellido}
               </h1>
               <p className="mt-0.5 flex items-center gap-1.5 text-sm text-slate-500">

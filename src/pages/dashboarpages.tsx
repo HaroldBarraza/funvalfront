@@ -4,6 +4,8 @@ import { Users, CalendarDays, Activity, Stethoscope } from "lucide-react";
 
 import { api } from "../libs/axios";
 import { StatusBadge } from "../components/serarchbar";
+import { usePacienteStore } from "../stores/pacientesstore";
+import { useCitasStado } from "../stores/citasStoer";
 
 interface StatCardProps {
   label: string;
@@ -34,29 +36,24 @@ const StatCard = ({ label, value, icon: Icon, color }: StatCardProps) => {
 
 export default function PaginaDashboard() {
   const [mantenimiento, setMantenimiento] = useState(false);
-
-  const [pacientes, setPacientes] = useState<number | null>(null);
   const [medicos, setMedicos] = useState<number | null>(null);
-  const [citasProgramadas, setCitasProgramadas] = useState<number | null>(null);
-  const [citasCompletadas, setCitasCompletadas] = useState<number | null>(null);
+
+  const pacientes = usePacienteStore((s) => s.paciente);
+  const cargarPacientes = usePacienteStore((s) => s.cargar);
+
+  const citas = useCitasStado((s) => s.citas);
+  const cargarCitas = useCitasStado((s) => s.cargarTodas);
+
+  const totalPacientes = pacientes.length;
+  const citasProgramadas = citas.filter((c) => c.id_estado === 1).length;
+  const citasCompletadas = citas.filter((c) => c.id_estado === 2).length;
 
   useEffect(() => {
-    api.get("/pacientes").then((res) => {
-      setPacientes(res.data.datos.length);
-    });
+    if (pacientes.length === 0) cargarPacientes();
+    if (citas.length === 0) cargarCitas();
 
     api.get("/users/medicos").then((res) => {
       setMedicos(res.data.datos.length);
-    });
-
-    api.get("/citas").then((res) => {
-      const citas = res.data.datos;
-      setCitasProgramadas(
-        citas.filter((c: { id_estado: number }) => c.id_estado === 1).length,
-      );
-      setCitasCompletadas(
-        citas.filter((c: { id_estado: number }) => c.id_estado === 2).length,
-      );
     });
   }, []);
 
@@ -85,7 +82,7 @@ export default function PaginaDashboard() {
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Pacientes"
-          value={pacientes}
+          value={totalPacientes}
           icon={Users}
           color="bg-blue-50 text-blue-600"
         />

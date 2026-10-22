@@ -1,86 +1,28 @@
-import { useEffect, useState, useOptimistic, startTransition } from "react";
+import { useEffect } from "react";
 import { CalendarDays, Stethoscope, User } from "lucide-react";
 import toast from "react-hot-toast";
-import {
-  EstadoCita,
-  getAll,
-  nombreMedico,
-  nombrePaciente,
-  updateEstado,
-} from "../service/citas";
-import type { CitasApi } from "../service/citas";
+import { useCitasStado } from "../stores/citasStoer";
+import { EstadoCita, nombreMedico, nombrePaciente } from "../service/citas";
 import { extraerMensajeError } from "../service/errorHandler";
 
-interface OptimisticUpdate {
-  id: number;
-  estado: number;
-}
-
 export default function PaginaCitas() {
-  const [citas, setCitas] = useState<CitasApi[]>([]);
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState(false);
-
-  const [citasOptimistas, addOptimistic] = useOptimistic(
-    citas,
-    (state: CitasApi[], update: OptimisticUpdate) =>
-      state.map((c) =>
-        c.id_cita === update.id
-          ? {
-              ...c,
-              id_estado: update.estado,
-              estado: {
-                name_estado:
-                  EstadoCita.find((e) => e.value === update.estado)?.label ??
-                  c.estado.name_estado,
-              },
-            }
-          : c,
-      ),
-  );
-
-  const cargarCitas = () => {
-    getAll()
-      .then((res) => setCitas(res.data.datos))
-      .catch(() => setError(true))
-      .finally(() => setCargando(false));
-  };
+  const citas = useCitasStado((s) => s.citas);
+  const cargando = useCitasStado((s) => s.cargando);
+  const error = useCitasStado((s) => s.error);
+  const cargarTodas = useCitasStado((s) => s.cargarTodas);
+  const actualizarEstado = useCitasStado((s) => s.actualizarEstado);
 
   useEffect(() => {
-    cargarCitas();
+    cargarTodas();
   }, []);
 
-  const reintentar = () => {
-    setCargando(true);
-    setError(false);
-    cargarCitas();
-  };
-
-  const handleCambiarEstado = (id: number, nuevoEstado: number) => {
-    startTransition(async () => {
-      addOptimistic({ id, estado: nuevoEstado });
-      try {
-        await updateEstado(id, nuevoEstado);
-        setCitas((prev) =>
-          prev.map((c) =>
-            c.id_cita === id
-              ? {
-                  ...c,
-                  id_estado: nuevoEstado,
-                  estado: {
-                    name_estado:
-                      EstadoCita.find((e) => e.value === nuevoEstado)?.label ??
-                      c.estado.name_estado,
-                  },
-                }
-              : c,
-          ),
-        );
-        toast.success("Estado actualizado");
-      } catch (err) {
-        toast.error(`Cambio revertido: ${extraerMensajeError(err)}`);
-      }
-    });
+  const handleCambiarEstado = async (id: number, nuevoEstado: number) => {
+    try {
+      await actualizarEstado(id, nuevoEstado);
+      toast.success("Estado actualizado");
+    } catch (err) {
+      toast.error(`Cambio revertido: ${extraerMensajeError(err)}`);
+    }
   };
 
   if (cargando) {
@@ -99,12 +41,10 @@ export default function PaginaCitas() {
         <h1 className="text-lg font-semibold text-slate-900">
           No se pudieron cargar las citas
         </h1>
-        <p className="max-w-md text-sm text-slate-500">
-          Verifica que el servidor esté corriendo y que tu sesión siga activa.
-        </p>
+        <p className="max-w-md text-sm text-slate-500">{error}</p>
         <button
           type="button"
-          onClick={reintentar}
+          onClick={() => cargarTodas()}
           className="mt-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
         >
           Reintentar
@@ -128,18 +68,17 @@ export default function PaginaCitas() {
       </header>
 
       <p className="mb-3 text-xs font-medium text-slate-500">
-        {citasOptimistas.length} cita
-        {citasOptimistas.length !== 1 ? "s" : ""} registrada
-        {citasOptimistas.length !== 1 ? "s" : ""}
+        {citas.length} cita{citas.length !== 1 ? "s" : ""} registrada
+        {citas.length !== 1 ? "s" : ""}
       </p>
 
-      {citasOptimistas.length === 0 ? (
+      {citas.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-300 bg-white py-12 text-center">
           <p className="text-sm text-slate-500">No hay citas registradas.</p>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {citasOptimistas.map((cita) => (
+          {citas.map((cita) => (
             <div
               key={cita.id_cita}
               className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-blue-200 hover:shadow-md"
