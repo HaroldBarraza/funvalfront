@@ -1,18 +1,27 @@
-import { Search } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
 
 interface Buscador {
   value: string;
   onchange: (values: string) => void;
+  cargando?: boolean;
 }
 
-export const SearchBar = ({ value, onchange }: Buscador) => {
+export const SearchBar = ({ value, onchange, cargando = false }: Buscador) => {
   return (
     <div className="relative w-full">
-      <Search
-        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-        size={18}
-        strokeWidth={2}
-      />
+      {cargando ? (
+        <Loader2
+          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 animate-spin text-blue-500"
+          size={18}
+          strokeWidth={2}
+        />
+      ) : (
+        <Search
+          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+          size={18}
+          strokeWidth={2}
+        />
+      )}
       <input
         type="text"
         value={value}

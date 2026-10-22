@@ -6,6 +6,13 @@ import { api } from "../libs/axios";
 import { StatusBadge } from "../components/serarchbar";
 import { usePacienteStore } from "../stores/pacientesstore";
 import { useCitasStado } from "../stores/citasStoer";
+import { useApi } from "../hooks/useApi";
+
+interface MedicoAPI {
+  id_empleado: number;
+  name_empleado: string;
+  appaterno: string;
+}
 
 interface StatCardProps {
   label: string;
@@ -36,25 +43,32 @@ const StatCard = ({ label, value, icon: Icon, color }: StatCardProps) => {
 
 export default function PaginaDashboard() {
   const [mantenimiento, setMantenimiento] = useState(false);
-  const [medicos, setMedicos] = useState<number | null>(null);
 
-  const pacientes = usePacienteStore((s) => s.paciente);
+  // Pacientes desde el store
+  const pacientes = usePacienteStore((s) => s.paciente) ?? [];
   const cargarPacientes = usePacienteStore((s) => s.cargar);
 
-  const citas = useCitasStado((s) => s.citas);
+  // Citas desde el store
+  const citas = useCitasStado((s) => s.citas) ?? [];
   const cargarCitas = useCitasStado((s) => s.cargarTodas);
 
+  // Médicos con useApi (maneja cargando/error/cleanup internamente)
+  const { data: medicosRespuesta } = useApi<MedicoAPI[]>(() =>
+    api
+      .get<{ datos: MedicoAPI[] }>("/users/medicos")
+      .then((r) => r.data.datos),
+  );
+
+  // Derivados
   const totalPacientes = pacientes.length;
+  const totalMedicos = medicosRespuesta ? medicosRespuesta.length : null;
   const citasProgramadas = citas.filter((c) => c.id_estado === 1).length;
   const citasCompletadas = citas.filter((c) => c.id_estado === 2).length;
 
   useEffect(() => {
     if (pacientes.length === 0) cargarPacientes();
     if (citas.length === 0) cargarCitas();
-
-    api.get("/users/medicos").then((res) => {
-      setMedicos(res.data.datos.length);
-    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -88,7 +102,7 @@ export default function PaginaDashboard() {
         />
         <StatCard
           label="Médicos"
-          value={medicos}
+          value={totalMedicos}
           icon={Stethoscope}
           color="bg-violet-50 text-violet-600"
         />

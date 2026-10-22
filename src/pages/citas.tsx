@@ -6,14 +6,15 @@ import { EstadoCita, nombreMedico, nombrePaciente } from "../service/citas";
 import { extraerMensajeError } from "../service/errorHandler";
 
 export default function PaginaCitas() {
-  const citas = useCitasStado((s) => s.citas);
+  const citas = useCitasStado((s) => s.citas) ?? [];
   const cargando = useCitasStado((s) => s.cargando);
   const error = useCitasStado((s) => s.error);
   const cargarTodas = useCitasStado((s) => s.cargarTodas);
   const actualizarEstado = useCitasStado((s) => s.actualizarEstado);
 
   useEffect(() => {
-    cargarTodas();
+    if (citas.length === 0) cargarTodas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleCambiarEstado = async (id: number, nuevoEstado: number) => {

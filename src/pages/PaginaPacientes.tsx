@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Users } from "lucide-react";
+import { Users, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { SearchBar } from "../components/serarchbar";
 import { PacientesCards } from "../components/PacientesCards";
@@ -7,22 +7,27 @@ import { FormularioPaciente } from "../components/formularioPaciente";
 import { ModalConfirmacion } from "../components/ModalConfirmacion";
 import { usePacienteStore } from "../stores/pacientesstore";
 import { useFiltrosStore } from "../stores/filtrostore";
+import { useDebounce } from "../hooks/useDebaunce";
 import { extraerMensajeError } from "../service/errorHandler";
 import type { Paciente } from "../types/paciente";
 
 export default function PaginaPacientes() {
-  // Store de pacientes
   const pacientes = usePacienteStore((s) => s.paciente);
   const cargando = usePacienteStore((s) => s.cargando);
   const error = usePacienteStore((s) => s.error);
   const cargar = usePacienteStore((s) => s.cargar);
   const eliminar = usePacienteStore((s) => s.eliminar);
 
-  // Store de filtros
   const queryPacientes = useFiltrosStore((s) => s.queryPacientes);
   const setQueryPacientes = useFiltrosStore((s) => s.setQueryPacientes);
+  const resetFiltros = useFiltrosStore((s) => s.resetFiltros);
 
-  // UI local (modal)
+  // El query debounced es el que realmente filtra
+  const queryDebounced = useDebounce(queryPacientes, 3000);
+
+  // true si hay un debounce pendiente (el usuario está escribiendo)
+  const buscando = queryPacientes !== queryDebounced;
+
   const [pacienteAEliminar, setPacienteAEliminar] = useState<Paciente | null>(
     null,
   );
@@ -32,7 +37,7 @@ export default function PaginaPacientes() {
     cargar();
   }, []);
 
-  const termino = queryPacientes.trim().toLowerCase();
+  const termino = queryDebounced.trim().toLowerCase();
   const pacientesFiltrados = termino
     ? pacientes.filter(
         (p) =>
@@ -59,6 +64,8 @@ export default function PaginaPacientes() {
       setEliminando(false);
     }
   };
+
+  const hayFiltrosActivos = queryPacientes !== "";
 
   if (cargando) {
     return (
@@ -104,8 +111,24 @@ export default function PaginaPacientes() {
 
       <FormularioPaciente />
 
-      <div className="mb-5">
-        <SearchBar value={queryPacientes} onchange={setQueryPacientes} />
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="flex-1">
+          <SearchBar
+            value={queryPacientes}
+            onchange={setQueryPacientes}
+            cargando={buscando}
+          />
+        </div>
+
+        <button
+          type="button"
+          onClick={resetFiltros}
+          disabled={!hayFiltrosActivos}
+          className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <X size={14} />
+          Limpiar filtros
+        </button>
       </div>
 
       <p className="mb-3 text-xs font-medium text-slate-500">
