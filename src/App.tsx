@@ -5,6 +5,7 @@ import PaginaDashboard from "./pages/dashboarpages";
 import { DetallePaciente } from "./pages/PaginaDetallePaciente";
 import { FormularioCita } from "./components/Formulariocitas";
 import { Paginanoencontrada } from "./pages/Pagenoencontrado";
+import PaginaReportes from "./pages/PaginaReportes";
 import PaginaCitas from "./pages/citas";
 import "./App.css";
 
@@ -17,6 +18,7 @@ function App() {
         <Route path="/pacientes/:id" element={<DetallePaciente />} />
         <Route path="/citas/nueva" element={<FormularioCita />} />
         <Route path="/citas" element={<PaginaCitas />} />
+        <Route path="/reportes" element={<PaginaReportes />} />
         <Route path="*" element={<Paginanoencontrada />} />
       </Route>
     </Routes>

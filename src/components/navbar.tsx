@@ -27,10 +27,13 @@ export const Nav = () => {
           Pacientes
         </NavLink>
         <NavLink to="/citas" className={linkClass}>
-        Citas
+          Citas
         </NavLink>
         <NavLink to="/citas/nueva" className={linkClass}>
           Nueva cita
+        </NavLink>
+        <NavLink to="/reportes" className={linkClass}>
+          Reportes
         </NavLink>
       </nav>
     </aside>
