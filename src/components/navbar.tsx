@@ -1,4 +1,6 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { LogOut } from "lucide-react";
+import { useAuthStore } from "../stores/authStore";
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
@@ -8,6 +10,14 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
   }`;
 
 export const Nav = () => {
+  const navigate = useNavigate();
+  const usuario = useAuthStore((s) => s.usuario);
+  const logout = useAuthStore((s) => s.logout);
+
+  const handlerLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
   return (
     <aside className="hidden w-64 shrink-0 flex-col border-r border-slate-200 bg-white md:flex">
       <div className="flex h-16 items-center gap-3 border-b border-slate-100 px-6">
@@ -36,6 +46,24 @@ export const Nav = () => {
           Reportes
         </NavLink>
       </nav>
+      <div className="border-t border-slate-100 p-4">
+        <div className="mb-3 rounded-lg bg-slate-50 p-3">
+          <p className="truncate text-sm font-semibold text-slate-900">
+            {usuario?.nombre ?? "Usuario"}
+          </p>
+          <p className="mt-0.5 truncate text-xs text-slate-500">
+            {usuario?.rol ?? "Sin rol"}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handlerLogout}
+          className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-rose-600 transition hover:bg-rose-50"
+        >
+          <LogOut size={16} />
+          Cerrar sesión
+        </button>
+      </div>
     </aside>
   );
 };
