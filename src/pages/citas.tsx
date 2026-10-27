@@ -3,7 +3,7 @@ import { CalendarDays, Stethoscope, User } from "lucide-react";
 import toast from "react-hot-toast";
 import { useCitasStado } from "../stores/citasStoer";
 import { EstadoCita, nombreMedico, nombrePaciente } from "../service/citas";
-import { extraerMensajeError } from "../service/errorHandler";
+import { extraerMensajeError } from "../libs/errorHandler";
 
 export default function PaginaCitas() {
   const citas = useCitasStado((s) => s.citas) ?? [];

@@ -6,7 +6,7 @@ import { loginSchema } from "../schemas/loginSchema";
 import type { LoginFormData } from "../schemas/loginSchema";
 import { login } from "../service/auth";
 import { useAuthStore } from "../stores/authStore";
-import { extraerMensajeError } from "../service/errorHandler";
+import { extraerMensajeError } from "../libs/errorHandler";
 
 function ClinicMark() {
   return (
@@ -67,7 +67,9 @@ export function LoginPage() {
             <div className="w-full max-w-sm">
               <div className="mb-10 flex items-center gap-3 lg:hidden">
                 <ClinicMark />
-                <span className="text-xl font-bold tracking-tight">Clínica</span>
+                <span className="text-xl font-bold tracking-tight">
+                  Clínica
+                </span>
               </div>
               <div className="mb-8">
                 <p className="mb-3 text-sm font-semibold text-blue-700">

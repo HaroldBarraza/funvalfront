@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { pacienteSchema } from "../schemas/pacientesschema";
 import type { PacienteFormData } from "../schemas/pacientesschema";
 import { usePacienteStore } from "../stores/pacientesstore";
-import { extraerMensajeError } from "../service/errorHandler";
+import { extraerMensajeError } from "../libs/errorHandler";
 
 export const FormularioPaciente = () => {
   const crear = usePacienteStore((s) => s.crear);
