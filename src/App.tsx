@@ -1,7 +1,8 @@
-import { Routes, Route} from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { Layout } from "./layouts/layout";
-import { ProtecRoute } from "./components/ProtectRoute";
+import { RutaProtegida } from "./components/rutaProtegida";
 import LoginPage from "./pages/pagesLogin";
+import { PaginaSinAcceso } from "./pages/paginasinAcceso";
 import PaginaPacientes from "./pages/PaginaPacientes";
 import PaginaDashboard from "./pages/dashboarpages";
 import { DetallePaciente } from "./pages/PaginaDetallePaciente";
@@ -16,20 +17,21 @@ function App() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
 
-      <Route
-        element={
-          <ProtecRoute>
-            <Layout />
-          </ProtecRoute>
-        }
-      >
-        <Route path="/" element={<PaginaDashboard />} />
-        <Route path="/pacientes" element={<PaginaPacientes />} />
-        <Route path="/pacientes/:id" element={<DetallePaciente />} />
-        <Route path="/citas" element={<PaginaCitas />} />
-        <Route path="/citas/nueva" element={<FormularioCita />} />
-        <Route path="/reportes" element={<PaginaReportes />} />
-        <Route path="*" element={<Paginanoencontrada />} />
+      <Route element={<RutaProtegida />}>
+        <Route element={<Layout />}>
+          <Route index element={<PaginaDashboard />} />
+          <Route path="/pacientes" element={<PaginaPacientes />} />
+          <Route path="/pacientes/:id" element={<DetallePaciente />} />
+          <Route path="/citas" element={<PaginaCitas />} />
+          <Route path="/citas/nueva" element={<FormularioCita />} />
+          <Route path="/sin-acceso" element={<PaginaSinAcceso />} />
+
+          <Route element={<RutaProtegida rolespermitidos={["GERENCIA"]} />}>
+            <Route path="/reportes" element={<PaginaReportes />} />
+          </Route>
+
+          <Route path="*" element={<Paginanoencontrada />} />
+        </Route>
       </Route>
     </Routes>
   );

@@ -8,7 +8,7 @@ import { ModalConfirmacion } from "../components/ModalConfirmacion";
 import { usePacienteStore } from "../stores/pacientesstore";
 import { useFiltrosStore } from "../stores/filtrostore";
 import { useDebounce } from "../hooks/useDebaunce";
-import { extraerMensajeError } from "../service/errorHandler";
+import { extraerMensajeError } from "../libs/errorHandler";
 import type { Paciente } from "../types/paciente";
 
 export default function PaginaPacientes() {

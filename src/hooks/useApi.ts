@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { extraerMensajeError } from "../service/errorHandler";
+import { extraerMensajeError } from "../libs/errorHandler";
 
 interface UseApiResult<T> {
   data: T | null;

@@ -6,7 +6,7 @@ import type {
   CrearPacienteDTO,
   ActualizarPacienteDTO,
 } from "../service/pacientes";
-import { extraerMensajeError } from "../service/errorHandler";
+import { extraerMensajeError } from "../libs/errorHandler";
 import type { Paciente } from "../types/paciente";
 
 const mapearPaciente = (p: PacienteAPI): Paciente => ({
