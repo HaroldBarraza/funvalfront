@@ -1,20 +1,21 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
-import type { Rol } from "../service/auth";
 
 interface RutaProtegidaProps {
-    rolespermitidos?: Rol[]
+  rolesPermitidos?: string[];
 }
 
-export const RutaProtegida = ({rolespermitidos}: RutaProtegidaProps) => {
-    const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
-    const usuario = useAuthStore((s) => s.usuario)
+export const RutaProtegida = ({ rolesPermitidos }: RutaProtegidaProps) => {
+  const autenticado = useAuthStore((s) => s.autenticado);
+  const usuarioRol = useAuthStore((s) => s.usuarioRol);
 
-    if(!isAuthenticated){
-        return<Navigate to="/login" replace />
-    }
-    if(rolespermitidos && usuario && !rolespermitidos.includes(usuario.rol)){
-        return <Navigate to="/sin-acceso" replace />
-    }
-    return <Outlet/>
-}
+  if (!autenticado) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (rolesPermitidos && usuarioRol && !rolesPermitidos.includes(usuarioRol)) {
+    return <Navigate to="/sin-acceso" replace />;
+  }
+
+  return <Outlet />;
+};

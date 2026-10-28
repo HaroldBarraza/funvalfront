@@ -10,6 +10,7 @@ import { FormularioCita } from "./components/Formulariocitas";
 import PaginaCitas from "./pages/citas";
 import PaginaReportes from "./pages/PaginaReportes";
 import { Paginanoencontrada } from "./pages/Pagenoencontrado";
+import PaginaPerfil from "./components/PaginPerfil";
 import "./App.css";
 
 function App() {
@@ -24,9 +25,10 @@ function App() {
           <Route path="/pacientes/:id" element={<DetallePaciente />} />
           <Route path="/citas" element={<PaginaCitas />} />
           <Route path="/citas/nueva" element={<FormularioCita />} />
+          <Route path="/perfil" element={<PaginaPerfil />} />
           <Route path="/sin-acceso" element={<PaginaSinAcceso />} />
 
-          <Route element={<RutaProtegida rolespermitidos={["GERENCIA"]} />}>
+          <Route element={<RutaProtegida rolesPermitidos={["GERENCIA"]} />}>
             <Route path="/reportes" element={<PaginaReportes />} />
           </Route>
 
