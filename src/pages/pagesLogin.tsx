@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { loginSchema } from "../schemas/loginSchema";
 import type { LoginFormData } from "../schemas/loginSchema";
-import { login } from "../service/auth";
+import { authService} from "../service/auth";
 import { useAuthStore } from "../stores/authStore";
 import { extraerMensajeError } from "../libs/errorHandler";
 
@@ -30,9 +30,9 @@ export function LoginPage() {
 
   const onSubmit = async (datos: LoginFormData) => {
     try {
-      const { token, usuario } = await login(datos);
-      setAuth(token, usuario);
-      toast.success(`¡Bienvenido, ${usuario.nombre}!`);
+      const { token, nombre, rol } = await authService.login(datos);
+      setAuth(token, nombre, rol);
+      toast.success(`¡Bienvenido, ${nombre}!`);
       navigate("/", { replace: true });
     } catch (err) {
       toast.error(extraerMensajeError(err));

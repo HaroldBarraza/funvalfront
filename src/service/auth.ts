@@ -1,21 +1,7 @@
 import { api } from "../libs/axios";
 import type { LoginFormData } from "../schemas/loginSchema";
 
-export type Rol = "RECEPCIONISTA" | "MEDICO" | "GERENCIA";
-
-export interface Usuario {
-  id: number;
-  nombre: string;
-  email: string;
-  rol: Rol;
-}
-
-export interface LoginResponse {
-  token: string;
-  usuario: Usuario;
-}
-
-interface LoginRespondeBack {
+interface LoginBackend {
   token: string;
 }
 
@@ -23,9 +9,15 @@ interface JWTPayload {
   id: number;
   name: string;
   email: string;
-  role: Rol;
+  role: string;
   iat: number;
   exp: number;
+}
+
+export interface LoginResponse {
+  token: string;
+  nombre: string;
+  rol: string;
 }
 
 const decodeJWT = <T>(token: string): T => {
@@ -40,20 +32,20 @@ const decodeJWT = <T>(token: string): T => {
   return JSON.parse(jsonPayload) as T;
 };
 
-export async function login(datos: LoginFormData): Promise<LoginResponse> {
-  const { data } = await api.post<LoginRespondeBack>("/auth/login", datos);
-  if (!data || typeof data.token !== "string") {
-    throw new Error("Erro del servidor al loguearse");
-  }
-  const payload = decodeJWT<JWTPayload>(data.token);
+export const authService = {
+  login: async (datos: LoginFormData): Promise<LoginResponse> => {
+    const { data } = await api.post<LoginBackend>("/auth/login", datos);
 
-  return {
-    token: data.token,
-    usuario: {
-      id: payload.id,
+    if (!data || typeof data.token !== "string") {
+      throw new Error("Respuesta inválida del servidor");
+    }
+
+    const payload = decodeJWT<JWTPayload>(data.token);
+
+    return {
+      token: data.token,
       nombre: payload.name,
-      email: payload.email,
       rol: payload.role,
-    },
-  };
-}
+    };
+  },
+};
