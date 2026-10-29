@@ -40,7 +40,6 @@ export function useApi<T>(
     return () => {
       cancelado = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...deps, tick]);
 
   const recargar = useCallback(() => setTick((n) => n + 1), []);
