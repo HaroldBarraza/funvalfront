@@ -1,5 +1,24 @@
 import { api } from "../libs/axios";
 
+export interface RespuestaPaginada<T> {
+  data: T[];
+  total: number;
+  pagina: number;
+  totalPaginas: number;
+}
+
+export const getPaginadas = (
+  pagina: number,
+  porPagina: number,
+  estado?: string,
+  signal?: AbortSignal,
+) =>
+  api
+    .get<RespuestaPaginada<CitasApi>>("/citas/paginado", {
+      params: { pagina, porPagina, estado },
+      signal,
+    })
+    .then((r) => r.data);
 export interface Pacientes {
   name_paciente: string;
   appaterno_paciente: string;
@@ -52,8 +71,7 @@ export type CrearCitasDto = {
   descripcion: string;
 };
 
-export const getAll = () =>
-  api.get<{ datos: CitasApi[] }>("/citas");
+export const getAll = () => api.get<{ datos: CitasApi[] }>("/citas");
 
 export const createCitas = (data: CrearCitasDto) =>
   api.post<{ data: CitasApi }>("/citas", data);

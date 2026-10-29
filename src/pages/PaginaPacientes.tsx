@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { SearchBar } from "../components/serarchbar";
 import { PacientesCards } from "../components/PacientesCards";
 import { FormularioPaciente } from "../components/formularioPaciente";
-import { ModalConfirmacion } from "../components/ModalConfirmacion";
+import { ModalConfirmacion } from "../shared/components/ui/ModalConfirmacion";
 import { usePacienteStore } from "../stores/pacientesstore";
 import { useFiltrosStore } from "../stores/filtrostore";
 import { useDebounce } from "../hooks/useDebaunce";

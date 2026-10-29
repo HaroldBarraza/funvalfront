@@ -7,7 +7,7 @@ interface PotectRouteProps {
 }
 
 export const ProtecRoute = ({children}: PotectRouteProps) => {
-    const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+    const isAuthenticated = useAuthStore((s) => s.autenticado)
     if(!isAuthenticated){
         return <Navigate to="/login" replace/>
     }

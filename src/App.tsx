@@ -12,6 +12,7 @@ import PaginaReportes from "./pages/PaginaReportes";
 import { Paginanoencontrada } from "./pages/Pagenoencontrado";
 import PaginaPerfil from "./components/PaginPerfil";
 import "./App.css";
+import PaginaHistorialCitas from "./pages/PaginaHistorialCitas";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="/pacientes" element={<PaginaPacientes />} />
           <Route path="/pacientes/:id" element={<DetallePaciente />} />
           <Route path="/citas" element={<PaginaCitas />} />
+          <Route path="/citas/historial" element={<PaginaHistorialCitas />} />
           <Route path="/citas/nueva" element={<FormularioCita />} />
           <Route path="/perfil" element={<PaginaPerfil />} />
           <Route path="/sin-acceso" element={<PaginaSinAcceso />} />
