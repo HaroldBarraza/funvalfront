@@ -9,7 +9,7 @@ interface ModalConfirmacionProps {
   cargando?: boolean;
   onConfirmar: () => void;
   onCancelar: () => void;
-}
+} 
 
 export const ModalConfirmacion = ({
   abierto,

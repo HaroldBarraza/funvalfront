@@ -14,7 +14,7 @@ import PaginaPerfil from "./components/PaginPerfil";
 import PaginaHistorialCitas from "./pages/PaginaHistorialCitas";
 import { ErrorBoundary } from "./shared/components/ui/ErrorBoundary";
 import { AlertaBanner } from "./shared/components/ui/AlertaBanner";
-import "./App.css";
+import "./App.css"; 
 
 function App() {
   return (

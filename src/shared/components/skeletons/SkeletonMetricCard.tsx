@@ -8,6 +8,6 @@ export function SkeletonMetricCard() {
         </div>
         <div className="h-11 w-11 shrink-0 animate-pulse rounded-lg bg-slate-200" />
       </div>
-    </div>
+    </div> 
   );
-}
+} 
