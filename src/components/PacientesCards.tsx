@@ -11,7 +11,6 @@ interface PacienteCardProps {
 export const PacientesCards = ({ paciente, onEliminar }: PacienteCardProps) => {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-blue-200 hover:shadow-md md:p-5">
-      {/* ---------- Vista mobile ---------- */}
       <div className="flex flex-col gap-3 md:hidden">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -47,7 +46,6 @@ export const PacientesCards = ({ paciente, onEliminar }: PacienteCardProps) => {
         </div>
       </div>
 
-      {/* ---------- Vista desktop ---------- */}
       <div className="md:flex md:items-center md:gap-4">
         <div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-sm font-semibold text-blue-600 md:flex">
           {paciente.nombre.charAt(0)}
@@ -85,7 +83,6 @@ export const PacientesCards = ({ paciente, onEliminar }: PacienteCardProps) => {
         </div>
       </div>
 
-      {/* ---------- Acciones ---------- */}
       <div className="mt-3 flex items-center gap-2 border-t border-slate-100 pt-3">
         <button
           type="button"

@@ -7,6 +7,7 @@ import { StatusBadge } from "../components/serarchbar";
 import { usePacienteStore } from "../stores/pacientesstore";
 import { useCitasStado } from "../stores/citasStoer";
 import { useApi } from "../hooks/useApi";
+import { SkeletonMetricCard } from "../shared/components/skeletons/SkeletonMetricCard";
 
 interface MedicoAPI {
   id_empleado: number;
@@ -44,31 +45,30 @@ const StatCard = ({ label, value, icon: Icon, color }: StatCardProps) => {
 export default function PaginaDashboard() {
   const [mantenimiento, setMantenimiento] = useState(false);
 
-  // Pacientes desde el store
   const pacientes = usePacienteStore((s) => s.paciente) ?? [];
   const cargarPacientes = usePacienteStore((s) => s.cargar);
+  const cargandoPacientes = usePacienteStore((s) => s.cargando);
 
-  // Citas desde el store
   const citas = useCitasStado((s) => s.citas) ?? [];
   const cargarCitas = useCitasStado((s) => s.cargarTodas);
+  const cargandoCitas = useCitasStado((s) => s.cargando);
 
-  // Médicos con useApi (maneja cargando/error/cleanup internamente)
-  const { data: medicosRespuesta } = useApi<MedicoAPI[]>(() =>
-    api
-      .get<{ datos: MedicoAPI[] }>("/users/medicos")
-      .then((r) => r.data.datos),
+  const { data: medicosRespuesta, cargando: cargandoMedicos } = useApi<
+    MedicoAPI[]
+  >(() =>
+    api.get<{ datos: MedicoAPI[] }>("/users/medicos").then((r) => r.data.datos),
   );
 
-  // Derivados
   const totalPacientes = pacientes.length;
   const totalMedicos = medicosRespuesta ? medicosRespuesta.length : null;
   const citasProgramadas = citas.filter((c) => c.id_estado === 1).length;
   const citasCompletadas = citas.filter((c) => c.id_estado === 2).length;
 
+  const cargandoTodo = cargandoPacientes || cargandoCitas || cargandoMedicos;
+
   useEffect(() => {
     if (pacientes.length === 0) cargarPacientes();
     if (citas.length === 0) cargarCitas();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -94,30 +94,38 @@ export default function PaginaDashboard() {
       </header>
 
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          label="Pacientes"
-          value={totalPacientes}
-          icon={Users}
-          color="bg-blue-50 text-blue-600"
-        />
-        <StatCard
-          label="Médicos"
-          value={totalMedicos}
-          icon={Stethoscope}
-          color="bg-violet-50 text-violet-600"
-        />
-        <StatCard
-          label="Citas programadas"
-          value={citasProgramadas}
-          icon={CalendarDays}
-          color="bg-sky-50 text-sky-600"
-        />
-        <StatCard
-          label="Completadas hoy"
-          value={citasCompletadas}
-          icon={Activity}
-          color="bg-emerald-50 text-emerald-600"
-        />
+        {cargandoTodo ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonMetricCard key={i} />
+          ))
+        ) : (
+          <>
+            <StatCard
+              label="Pacientes"
+              value={totalPacientes}
+              icon={Users}
+              color="bg-blue-50 text-blue-600"
+            />
+            <StatCard
+              label="Médicos"
+              value={totalMedicos}
+              icon={Stethoscope}
+              color="bg-violet-50 text-violet-600"
+            />
+            <StatCard
+              label="Citas programadas"
+              value={citasProgramadas}
+              icon={CalendarDays}
+              color="bg-sky-50 text-sky-600"
+            />
+            <StatCard
+              label="Completadas hoy"
+              value={citasCompletadas}
+              icon={Activity}
+              color="bg-emerald-50 text-emerald-600"
+            />
+          </>
+        )}
       </div>
 
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
