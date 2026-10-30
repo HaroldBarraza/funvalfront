@@ -17,7 +17,7 @@ export function SkeletonPacienteRow() {
         <div className="hidden w-28 shrink-0 md:block">
           <div className="ml-auto h-5 w-16 animate-pulse rounded-full bg-slate-200" />
         </div>
-      </div>
+      </div> 
 
       <div className="mt-3 flex items-center gap-2 border-t border-slate-100 pt-3">
         <div className="h-7 w-20 animate-pulse rounded-lg bg-slate-200" />

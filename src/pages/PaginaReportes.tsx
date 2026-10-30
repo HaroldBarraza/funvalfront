@@ -154,6 +154,6 @@ export default function PaginaReportes() {
           </ResponsiveContainer>
         )}
       </section>
-    </div>
+    </div> 
   );
 }

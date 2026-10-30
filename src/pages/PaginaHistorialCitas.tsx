@@ -20,7 +20,7 @@ import { SkeletonCitaRow } from "../shared/components/skeletons/SkeletonCitaRow"
 import { EstadoVacio } from "../shared/components/ui/EstadoVacio";
 import { AlertaBanner } from "../shared/components/ui/AlertaBanner";
 
-const POR_PAGINA = 10;
+const POR_PAGINA = 10; 
 
 const ESTADOS_FILTRO = [
   { value: "Todos", label: "Todos" },

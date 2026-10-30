@@ -6,7 +6,7 @@ interface EstadoVacioProps {
   descripcion?: string;
   icono?: ReactNode;
   accion?: { label: string; onClick: () => void };
-}
+} 
 
 export function EstadoVacio({ titulo, descripcion, icono, accion }: EstadoVacioProps) {
   return (

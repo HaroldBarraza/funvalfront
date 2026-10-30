@@ -188,7 +188,7 @@ export default function PaginaDashboard() {
               {mantenimiento
                 ? "Desactivar mantenimiento"
                 : "Activar mantenimiento"}
-            </button>
+            </button> 
           </div>
         </div>
       </section>

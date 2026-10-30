@@ -90,5 +90,5 @@ export function AlertaBanner({
         </button>
       )}
     </div>
-  );
+  ); 
 }

@@ -191,6 +191,6 @@ export default function PaginaPacientes() {
         onConfirmar={confirmarEliminar}
         onCancelar={() => setPacienteAEliminar(null)}
       />
-    </div>
+    </div> 
   );
 }

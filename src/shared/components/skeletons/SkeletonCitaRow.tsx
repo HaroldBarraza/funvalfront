@@ -19,6 +19,6 @@ export function SkeletonCitaRow() {
 
         <div className="h-9 w-28 shrink-0 animate-pulse rounded-lg bg-slate-200" />
       </div>
-    </div>
+    </div> 
   );
 }
