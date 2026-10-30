@@ -40,7 +40,6 @@ export default function PaginaPerfil() {
     defaultValues: { nombre: "", email: "", telefono: "" },
   });
 
-  // Carga el perfil completo desde el backend al entrar
   useEffect(() => {
     perfilService
       .obtener()
@@ -91,7 +90,6 @@ export default function PaginaPerfil() {
       );
       setFotoArchivo(undefined);
       toast.success("Perfil actualizado");
-      // ← Fix del "se queda en editar": volver a modo ver
       setModo("ver");
     } catch (err) {
       toast.error(extraerMensajeError(err));
@@ -133,7 +131,6 @@ export default function PaginaPerfil() {
       </header>
 
       {modo === "ver" ? (
-        // ============== MODO VER ==============
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex flex-col items-center gap-3">
             <div className="grid h-24 w-24 place-items-center overflow-hidden rounded-full bg-blue-50 text-3xl font-bold text-blue-600">
@@ -186,7 +183,6 @@ export default function PaginaPerfil() {
           </div>
         </div>
       ) : (
-        // ============== MODO EDITAR ==============
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"

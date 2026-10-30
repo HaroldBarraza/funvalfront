@@ -91,7 +91,6 @@ export const FormularioCita = () => {
       onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6"
     >
-      {/* Nombre del paciente */}
       <div className="flex flex-col gap-1">
         <label className="text-sm font-medium text-slate-700">
           Nombre del paciente
@@ -110,7 +109,6 @@ export const FormularioCita = () => {
         )}
       </div>
 
-      {/* Médico */}
       <div className="flex flex-col gap-1">
         <label className="text-sm font-medium text-slate-700">Médico</label>
         <select
@@ -136,8 +134,6 @@ export const FormularioCita = () => {
           <p className="text-xs text-rose-600">{errors.medicoId.message}</p>
         )}
       </div>
-
-      {/* Fecha */}
       <div className="flex flex-col gap-1">
         <label className="text-sm font-medium text-slate-700">Fecha</label>
         <input
@@ -153,7 +149,6 @@ export const FormularioCita = () => {
         )}
       </div>
 
-      {/* Hora */}
       <div className="flex flex-col gap-1">
         <label className="text-sm font-medium text-slate-700">Hora</label>
         <input
@@ -169,7 +164,6 @@ export const FormularioCita = () => {
         )}
       </div>
 
-      {/* Motivo */}
       <div className="flex flex-col gap-1">
         <label className="text-sm font-medium text-slate-700">Motivo</label>
         <textarea
@@ -185,7 +179,6 @@ export const FormularioCita = () => {
         )}
       </div>
 
-      {/* Urgencia */}
       <div className="flex flex-col gap-1">
         <label className="text-sm font-medium text-slate-700">Urgencia</label>
         <select
@@ -204,7 +197,6 @@ export const FormularioCita = () => {
         )}
       </div>
 
-      {/* Acciones */}
       <div className="mt-2 flex gap-3">
         <button
           type="button"

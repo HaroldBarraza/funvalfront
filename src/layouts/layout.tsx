@@ -14,7 +14,6 @@ export const Layout = () => {
   const logout = useAuthStore((s) => s.logout);
   const actualizarPerfil = useAuthStore((s) => s.actualizarPerfil);
 
-  // Carga el avatar desde /auth/me al montar
   useEffect(() => {
     if (!autenticado) return;
     perfilService

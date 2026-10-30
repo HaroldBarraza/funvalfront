@@ -11,8 +11,10 @@ import PaginaCitas from "./pages/citas";
 import PaginaReportes from "./pages/PaginaReportes";
 import { Paginanoencontrada } from "./pages/Pagenoencontrado";
 import PaginaPerfil from "./components/PaginPerfil";
-import "./App.css";
 import PaginaHistorialCitas from "./pages/PaginaHistorialCitas";
+import { ErrorBoundary } from "./shared/components/ui/ErrorBoundary";
+import { AlertaBanner } from "./shared/components/ui/AlertaBanner";
+import "./App.css";
 
 function App() {
   return (
@@ -25,13 +27,45 @@ function App() {
           <Route path="/pacientes" element={<PaginaPacientes />} />
           <Route path="/pacientes/:id" element={<DetallePaciente />} />
           <Route path="/citas" element={<PaginaCitas />} />
-          <Route path="/citas/historial" element={<PaginaHistorialCitas />} />
+
+          <Route
+            path="/citas/historial"
+            element={
+              <ErrorBoundary
+                fallback={
+                  <AlertaBanner
+                    tipo="error"
+                    mensaje="Error al cargar el historial"
+                    descripcion="Recarga la página o intenta de nuevo más tarde."
+                  />
+                }
+              >
+                <PaginaHistorialCitas />
+              </ErrorBoundary>
+            }
+          />
+
           <Route path="/citas/nueva" element={<FormularioCita />} />
           <Route path="/perfil" element={<PaginaPerfil />} />
           <Route path="/sin-acceso" element={<PaginaSinAcceso />} />
 
           <Route element={<RutaProtegida rolesPermitidos={["GERENCIA"]} />}>
-            <Route path="/reportes" element={<PaginaReportes />} />
+            <Route
+              path="/reportes"
+              element={
+                <ErrorBoundary
+                  fallback={
+                    <AlertaBanner
+                      tipo="error"
+                      mensaje="Error al cargar los reportes"
+                      descripcion="Las gráficas no pudieron renderizarse."
+                    />
+                  }
+                >
+                  <PaginaReportes />
+                </ErrorBoundary>
+              }
+            />
           </Route>
 
           <Route path="*" element={<Paginanoencontrada />} />

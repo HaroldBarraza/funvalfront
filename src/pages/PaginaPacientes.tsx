@@ -4,7 +4,9 @@ import toast from "react-hot-toast";
 import { SearchBar } from "../components/serarchbar";
 import { PacientesCards } from "../components/PacientesCards";
 import { FormularioPaciente } from "../components/formularioPaciente";
-import { ModalConfirmacion } from "../components/ModalConfirmacion";
+import { ModalConfirmacion } from "../shared/components/ui/ModalConfirmacion";
+import { EstadoVacio } from "../shared/components/ui/EstadoVacio";
+import { SkeletonPacienteRow } from "../shared/components/skeletons/SkeletonPacienteRow";
 import { usePacienteStore } from "../stores/pacientesstore";
 import { useFiltrosStore } from "../stores/filtrostore";
 import { useDebounce } from "../hooks/useDebaunce";
@@ -22,10 +24,7 @@ export default function PaginaPacientes() {
   const setQueryPacientes = useFiltrosStore((s) => s.setQueryPacientes);
   const resetFiltros = useFiltrosStore((s) => s.resetFiltros);
 
-  // El query debounced es el que realmente filtra
   const queryDebounced = useDebounce(queryPacientes, 3000);
-
-  // true si hay un debounce pendiente (el usuario está escribiendo)
   const buscando = queryPacientes !== queryDebounced;
 
   const [pacienteAEliminar, setPacienteAEliminar] = useState<Paciente | null>(
@@ -69,13 +68,26 @@ export default function PaginaPacientes() {
 
   if (cargando) {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600" />
-        <p className="text-sm text-slate-500">Cargando pacientes...</p>
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+        <header className="mb-6 flex items-center gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
+            <Users size={22} strokeWidth={2} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Pacientes</h1>
+            <p className="mt-0.5 text-sm text-slate-500">
+              Lista de pacientes registrados en el sistema.
+            </p>
+          </div>
+        </header>
+        <div className="flex flex-col gap-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <SkeletonPacienteRow key={i} />
+          ))}
+        </div>
       </div>
     );
   }
-
   if (error) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 px-6 text-center">
@@ -153,12 +165,17 @@ export default function PaginaPacientes() {
             />
           ))}
         </div>
+      ) : pacientes.length === 0 ? (
+        <EstadoVacio
+          titulo="No hay pacientes registrados"
+          descripcion="Agrega el primer paciente con el formulario de arriba."
+        />
       ) : (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-white py-12 text-center">
-          <p className="text-sm text-slate-500">
-            No se encontraron pacientes que coincidan con la búsqueda.
-          </p>
-        </div>
+        <EstadoVacio
+          titulo="No se encontraron coincidencias"
+          descripcion={`Ningún paciente coincide con "${queryPacientes}".`}
+          accion={{ label: "Limpiar búsqueda", onClick: resetFiltros }}
+        />
       )}
 
       <ModalConfirmacion

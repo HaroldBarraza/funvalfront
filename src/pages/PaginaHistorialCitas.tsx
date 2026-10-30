@@ -16,6 +16,9 @@ import {
 } from "../service/citas";
 import type { CitasApi, RespuestaPaginada } from "../service/citas";
 import { extraerMensajeError } from "../libs/errorHandler";
+import { SkeletonCitaRow } from "../shared/components/skeletons/SkeletonCitaRow";
+import { EstadoVacio } from "../shared/components/ui/EstadoVacio";
+import { AlertaBanner } from "../shared/components/ui/AlertaBanner";
 
 const POR_PAGINA = 10;
 
@@ -31,7 +34,6 @@ type EstadoFiltro = (typeof ESTADOS_FILTRO)[number]["value"];
 export default function PaginaHistorialCitas() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // El estado vive en la URL (no en useState)
   const paginaParam = Number(searchParams.get("pagina")) || 1;
   const estadoParam = (searchParams.get("estado") ?? "Todos") as EstadoFiltro;
 
@@ -67,7 +69,6 @@ export default function PaginaHistorialCitas() {
   };
 
   const cambiarEstado = (nuevoEstado: EstadoFiltro) => {
-    // Reset a página 1 en la misma llamada
     setSearchParams({ pagina: "1", estado: nuevoEstado });
   };
 
@@ -91,7 +92,6 @@ export default function PaginaHistorialCitas() {
         </div>
       </header>
 
-      {/* Filtro por estado */}
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium text-slate-700">Estado:</label>
@@ -116,29 +116,34 @@ export default function PaginaHistorialCitas() {
         )}
       </div>
 
-      {/* Error */}
       {error && (
-        <div className="mb-5 rounded-xl border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-medium text-rose-700">
-          {error}
+        <div className="mb-5">
+          <AlertaBanner tipo="error" mensaje={error} />
         </div>
       )}
 
-      {/* Lista / Skeleton / Vacío */}
       {cargando ? (
         <div className="flex flex-col gap-3">
           {Array.from({ length: POR_PAGINA }).map((_, i) => (
-            <div
-              key={i}
-              className="h-28 animate-pulse rounded-xl border border-slate-200 bg-slate-100"
-            />
+            <SkeletonCitaRow key={i} />
           ))}
         </div>
       ) : citas.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-white py-12 text-center">
-          <p className="text-sm text-slate-500">
-            No hay citas con este filtro.
-          </p>
-        </div>
+        estadoParam === "Todos" ? (
+          <EstadoVacio
+            titulo="No hay citas registradas"
+            descripcion="Cuando agendes citas, aparecerán aquí."
+          />
+        ) : (
+          <EstadoVacio
+            titulo={`No hay citas con estado "${estadoParam}"`}
+            descripcion="Prueba con otro filtro o vuelve a ver todas las citas."
+            accion={{
+              label: "Ver todas",
+              onClick: () => cambiarEstado("Todos"),
+            }}
+          />
+        )
       ) : (
         <div className="flex flex-col gap-3">
           {citas.map((cita) => (
@@ -194,8 +199,7 @@ export default function PaginaHistorialCitas() {
         </div>
       )}
 
-      {/* Controles de paginación */}
-      {!cargando && respuesta && (
+      {!cargando && respuesta && total > 0 && (
         <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
           <p className="text-xs font-medium text-slate-500">
             Página {respuesta.pagina} de {totalPaginas} — {total} registro
