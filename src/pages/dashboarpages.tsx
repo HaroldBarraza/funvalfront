@@ -1,13 +1,15 @@
-import { useEffect, useState } from "react";
+
 import { Link } from "react-router-dom";
 import { Users, CalendarDays, Activity, Stethoscope } from "lucide-react";
 
 import { api } from "../libs/axios";
 import { StatusBadge } from "../components/serarchbar";
-import { usePacienteStore } from "../stores/pacientesstore";
-import { useCitasStado } from "../stores/citasStoer";
+
 import { useApi } from "../hooks/useApi";
 import { SkeletonMetricCard } from "../shared/components/skeletons/SkeletonMetricCard";
+import { useCitas } from "../features/pacientes/hooks/useCitas";
+import { usePacientes } from "../features/pacientes/hooks/usePacientes";
+import { useState } from "react";
 
 interface MedicoAPI {
   id_empleado: number;
@@ -44,14 +46,9 @@ const StatCard = ({ label, value, icon: Icon, color }: StatCardProps) => {
 
 export default function PaginaDashboard() {
   const [mantenimiento, setMantenimiento] = useState(false);
+  const {citas, cargando:cargandoCitas} = useCitas()
+  const {pacientes, cargando: cargandoPacientes} = usePacientes()
 
-  const pacientes = usePacienteStore((s) => s.paciente) ?? [];
-  const cargarPacientes = usePacienteStore((s) => s.cargar);
-  const cargandoPacientes = usePacienteStore((s) => s.cargando);
-
-  const citas = useCitasStado((s) => s.citas) ?? [];
-  const cargarCitas = useCitasStado((s) => s.cargarTodas);
-  const cargandoCitas = useCitasStado((s) => s.cargando);
 
   const { data: medicosRespuesta, cargando: cargandoMedicos } = useApi<
     MedicoAPI[]
@@ -65,11 +62,6 @@ export default function PaginaDashboard() {
   const citasCompletadas = citas.filter((c) => c.id_estado === 2).length;
 
   const cargandoTodo = cargandoPacientes || cargandoCitas || cargandoMedicos;
-
-  useEffect(() => {
-    if (pacientes.length === 0) cargarPacientes();
-    if (citas.length === 0) cargarCitas();
-  }, []);
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-10">

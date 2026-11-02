@@ -1,27 +1,20 @@
-import { useEffect, useState } from "react";
+
 import { useParams, useNavigate } from "react-router-dom";
 import { Mail, Phone, Stethoscope, Calendar, ArrowLeft } from "lucide-react";
 import { BadgeEstado } from "../components/badgeEstado";
 import { Paginanoencontrada } from "./Pagenoencontrado";
-import { usePacienteStore } from "../stores/pacientesstore";
+import { usePacientes } from "../features/pacientes/hooks/usePacientes";
 
 export const DetallePaciente = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const pacientes = usePacienteStore((s) => s.paciente);
-  const cargando = usePacienteStore((s) => s.cargando);
-  const cargar = usePacienteStore((s) => s.cargar);
 
-  const [inicializando, setInicializando] = useState(pacientes.length === 0);
+  const {pacientes, cargando} = usePacientes();
 
-  useEffect(() => {
-    if (pacientes.length === 0) {
-      cargar().finally(() => setInicializando(false));
-    }
-  }, []);
 
-  if (inicializando || (cargando && pacientes.length === 0)) {
+
+  if (cargando || (cargando && pacientes.length === 0)) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <p className="text-sm text-slate-500">Cargando...</p>

@@ -7,18 +7,14 @@ import { FormularioPaciente } from "../components/formularioPaciente";
 import { ModalConfirmacion } from "../shared/components/ui/ModalConfirmacion";
 import { EstadoVacio } from "../shared/components/ui/EstadoVacio";
 import { SkeletonPacienteRow } from "../shared/components/skeletons/SkeletonPacienteRow";
-import { usePacienteStore } from "../stores/pacientesstore";
 import { useFiltrosStore } from "../stores/filtrostore";
 import { useDebounce } from "../hooks/useDebaunce";
 import { extraerMensajeError } from "../libs/errorHandler";
 import type { Paciente } from "../types/paciente";
+import { usePacientes } from "../features/pacientes/hooks/usePacientes";
 
 export default function PaginaPacientes() {
-  const pacientes = usePacienteStore((s) => s.paciente);
-  const cargando = usePacienteStore((s) => s.cargando);
-  const error = usePacienteStore((s) => s.error);
-  const cargar = usePacienteStore((s) => s.cargar);
-  const eliminar = usePacienteStore((s) => s.eliminar);
+  const {pacientes, cargando, error, cargar, eliminar} = usePacientes()
 
   const queryPacientes = useFiltrosStore((s) => s.queryPacientes);
   const setQueryPacientes = useFiltrosStore((s) => s.setQueryPacientes);

@@ -1,21 +1,11 @@
-import { useEffect } from "react";
 import { CalendarDays, Stethoscope, User } from "lucide-react";
 import toast from "react-hot-toast";
-import { useCitasStado } from "../stores/citasStoer";
 import { EstadoCita, nombreMedico, nombrePaciente } from "../service/citas";
 import { extraerMensajeError } from "../libs/errorHandler";
+import { useCitas } from "../features/pacientes/hooks/useCitas";
 
 export default function PaginaCitas() {
-  const citas = useCitasStado((s) => s.citas) ?? [];
-  const cargando = useCitasStado((s) => s.cargando);
-  const error = useCitasStado((s) => s.error);
-  const cargarTodas = useCitasStado((s) => s.cargarTodas);
-  const actualizarEstado = useCitasStado((s) => s.actualizarEstado);
-
-  useEffect(() => {
-    if (citas.length === 0) cargarTodas();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { citas, cargando, error, recarga, actualizarEstado } = useCitas();
 
   const handleCambiarEstado = async (id: number, nuevoEstado: number) => {
     try {
@@ -45,7 +35,7 @@ export default function PaginaCitas() {
         <p className="max-w-md text-sm text-slate-500">{error}</p>
         <button
           type="button"
-          onClick={() => cargarTodas()}
+          onClick={() => recarga()}
           className="mt-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
         >
           Reintentar
