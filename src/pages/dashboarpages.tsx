@@ -1,15 +1,20 @@
-
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Users, CalendarDays, Activity, Stethoscope } from "lucide-react";
+import {
+  Users,
+  CalendarDays,
+  Activity,
+  Stethoscope,
+  RefreshCw,
+  Percent,
+} from "lucide-react";
 
 import { api } from "../libs/axios";
 import { StatusBadge } from "../components/serarchbar";
-
+import { usePacientes } from "../features/pacientes/hooks/usePacientes";
+import { useCitas } from "../features/pacientes/hooks/useCitas";
 import { useApi } from "../hooks/useApi";
 import { SkeletonMetricCard } from "../shared/components/skeletons/SkeletonMetricCard";
-import { useCitas } from "../features/pacientes/hooks/useCitas";
-import { usePacientes } from "../features/pacientes/hooks/usePacientes";
-import { useState } from "react";
 
 interface MedicoAPI {
   id_empleado: number;
@@ -19,7 +24,7 @@ interface MedicoAPI {
 
 interface StatCardProps {
   label: string;
-  value: number | null;
+  value: number | string | null;
   icon: typeof Users;
   color: string;
 }
@@ -46,9 +51,13 @@ const StatCard = ({ label, value, icon: Icon, color }: StatCardProps) => {
 
 export default function PaginaDashboard() {
   const [mantenimiento, setMantenimiento] = useState(false);
-  const {citas, cargando:cargandoCitas} = useCitas()
-  const {pacientes, cargando: cargandoPacientes} = usePacientes()
 
+  const {
+    pacientes,
+    cargando: cargandoPacientes,
+    cargar: cargarPacientes,
+  } = usePacientes();
+  const { citas, cargando: cargandoCitas, recarga: recargarCitas } = useCitas();
 
   const { data: medicosRespuesta, cargando: cargandoMedicos } = useApi<
     MedicoAPI[]
@@ -56,15 +65,34 @@ export default function PaginaDashboard() {
     api.get<{ datos: MedicoAPI[] }>("/users/medicos").then((r) => r.data.datos),
   );
 
-  const totalPacientes = pacientes.length;
-  const totalMedicos = medicosRespuesta ? medicosRespuesta.length : null;
-  const citasProgramadas = citas.filter((c) => c.id_estado === 1).length;
-  const citasCompletadas = citas.filter((c) => c.id_estado === 2).length;
+  const metricas = useMemo(() => {
+    const totalPacientes = pacientes.length;
+    const totalMedicos = medicosRespuesta ? medicosRespuesta.length : null;
+    const citasProgramadas = citas.filter((c) => c.id_estado === 1).length;
+    const citasCompletadas = citas.filter((c) => c.id_estado === 2).length;
+    const totalCitas = citas.length;
+
+    const porcentajeCompletadas =
+      totalCitas > 0 ? Math.round((citasCompletadas / totalCitas) * 100) : 0;
+
+    return {
+      totalPacientes,
+      totalMedicos,
+      citasProgramadas,
+      citasCompletadas,
+      porcentajeCompletadas,
+    };
+  }, [pacientes, citas, medicosRespuesta]);
 
   const cargandoTodo = cargandoPacientes || cargandoCitas || cargandoMedicos;
 
+  const handleRefrescar = () => {
+    cargarPacientes();
+    recargarCitas();
+  };
+
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
+    <div className="mx-auto max-w-6xl px-6 py-10">
       {mantenimiento && (
         <div className="mb-6 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-5 py-3 text-sm font-medium text-amber-800">
           <span className="relative flex h-2.5 w-2.5">
@@ -82,39 +110,59 @@ export default function PaginaDashboard() {
             Resumen general del sistema médico.
           </p>
         </div>
-        <StatusBadge activo={!mantenimiento} />
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={handleRefrescar}
+            disabled={cargandoTodo}
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <RefreshCw
+              size={16}
+              className={cargandoTodo ? "animate-spin" : ""}
+            />
+            Actualizar datos
+          </button>
+          <StatusBadge activo={!mantenimiento} />
+        </div>
       </header>
 
-      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {cargandoTodo ? (
-          Array.from({ length: 4 }).map((_, i) => (
+          Array.from({ length: 5 }).map((_, i) => (
             <SkeletonMetricCard key={i} />
           ))
         ) : (
           <>
             <StatCard
               label="Pacientes"
-              value={totalPacientes}
+              value={metricas.totalPacientes}
               icon={Users}
               color="bg-blue-50 text-blue-600"
             />
             <StatCard
               label="Médicos"
-              value={totalMedicos}
+              value={metricas.totalMedicos}
               icon={Stethoscope}
               color="bg-violet-50 text-violet-600"
             />
             <StatCard
-              label="Citas programadas"
-              value={citasProgramadas}
+              label="Programadas"
+              value={metricas.citasProgramadas}
               icon={CalendarDays}
               color="bg-sky-50 text-sky-600"
             />
             <StatCard
-              label="Completadas hoy"
-              value={citasCompletadas}
+              label="Completadas"
+              value={metricas.citasCompletadas}
               icon={Activity}
               color="bg-emerald-50 text-emerald-600"
+            />
+            <StatCard
+              label="Tasa completadas"
+              value={`${metricas.porcentajeCompletadas}%`}
+              icon={Percent}
+              color="bg-amber-50 text-amber-600"
             />
           </>
         )}
@@ -180,7 +228,7 @@ export default function PaginaDashboard() {
               {mantenimiento
                 ? "Desactivar mantenimiento"
                 : "Activar mantenimiento"}
-            </button> 
+            </button>
           </div>
         </div>
       </section>
